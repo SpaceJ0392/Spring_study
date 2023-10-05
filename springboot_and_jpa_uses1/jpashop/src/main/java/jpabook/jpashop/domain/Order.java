@@ -15,14 +15,18 @@ public class Order {
     @Column(name = "orders_id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id") // FK의 이름을 member_id로 지정.
     private Member member;
 
-    @OneToMany(mappedBy = "order")
-    private List<OrderTime> orderTimes = new ArrayList<>();
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToOne
+    //cascade롤 통해서 각각의 orderTime에 대해서 각각 persist를 취하지 않고, 그냥 order에 대해서만 persist를 취해도 알아서 다 persist해준다.
+    // + cascade ALL로 해서 삭제 시에도 다 같이 삭제된다.
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    //기본적으로 모든 entity는 저장하고 싶으면 각각 persist해 주어야 한다. 그러나, cascade로 한 번에 처리한다.
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
 
@@ -30,4 +34,23 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status; //주문 상태 [ORDER, CANCEL]
+
+    //==연관 관계 편의 메서드==//
+    //기본적으로 양방향 성을 가지는 엔티티에 대해서는 양 방향에서 서로의 값을 가져야 한다.
+    //이를 원자적으로 묶어서 한번에 처리하도록 하는 메서드다.
+
+    public void setMember(Member member){
+        this.member = member;
+        member.getOrders().add(this);
+    }
+
+    public void addOrderItem(OrderItem orderItem){
+        orderItems.add(orderItem);
+        orderItem.setOrder(this);
+    }
+
+    public void setDelivery(Delivery delivery){
+        this.delivery = delivery;
+        delivery.setOrder(this);
+    }
 }

@@ -3,12 +3,13 @@ package jpabook.jpashop.domain;
 import jakarta.persistence.*;
 import jpabook.jpashop.domain.item.Item;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
+@Getter @Setter
 public class Category {
 
     @Id @GeneratedValue
@@ -26,10 +27,17 @@ public class Category {
     //그래서 JoinTable 이 필요... (실무에서는 거의 안씀. 딱 이 그림 밖에 안됨 - 필드 추가 불가...)
     private List<Item> items = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) //레이지로 해놓지 않으면, 해당 목록이 100개일 때, join한다고 쿼리가 100번 날아감...
+    //XtoOne에는 기본 fetch가 LAZY가 아니므로 설정 필요.
     @JoinColumn(name = "parent_id")
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
     private List<Category> child = new ArrayList<>();
+
+    //==연관 관계 메서드==//
+    public void addChildCategory(Category child){
+        this.child.add(child);
+        child.setParent(this);
+    }
 }
