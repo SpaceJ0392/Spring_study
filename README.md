@@ -1,6 +1,6 @@
 # Spring_study
 이 리포지토리는 inflearn 김영한의 Spring 강의를 학습한 내용을 정리하는 공간입니다.  
-기존에 정리했던 Spring_core는 이미 존재하는 리포지토리를 참고하시길 바랍니다.
+기존에 정리했던 Spring_core는 이미 존재하는 리포지토리에 있습니다.
 - https://github.com/SpaceJ0392/Spring_core.git
 
 __현재 정리되고 있는 내용__
