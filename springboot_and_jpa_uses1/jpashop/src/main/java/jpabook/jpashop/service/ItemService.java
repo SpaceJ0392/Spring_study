@@ -21,6 +21,15 @@ public class ItemService {
         return item.getId();
     }
 
+    @Transactional //준영속성 객체를 영속성 객체에 set하여 dirty checking으로 처리
+    public void updateItem(Long itemId, int price, String name, int stockQuantity){
+        Item item = itemRepository.findOne(itemId);
+        item.setPrice(price);
+        item.setName(name);
+        item.setStockQuantity(stockQuantity);
+        //... 이러한 형태로 처리 가능.
+    }
+
     public List<Item> findItems(){
         return itemRepository.findAll();
     }
