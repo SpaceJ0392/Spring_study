@@ -35,6 +35,8 @@ dependencies { // gradle는 필요한 의존관계를 한번에 쭉 당긴다. (
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0")
     //SQL 로거용 파라미터 보이기
 
+    implementation 'org.springframework.boot:spring-boot-starter-validation' //@NotEmpty 사용 validation
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
