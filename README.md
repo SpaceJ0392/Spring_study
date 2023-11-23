@@ -7,6 +7,6 @@ __현재 정리 중인 내용__
 
 __현재 정리된 내용__
 - Spring Core
-  - project file : []()
+  - project file : [spring_core_basic](https://github.com/SpaceJ0392/Spring_study/tree/main/spring_core_basic)
 - Springboot 와 JPA 활용 1 - 웹 애플리케이션 만들기 (2023.09.13.)  
   - project file : [springboot_and_jpa_uses1/jpashop](https://github.com/SpaceJ0392/Spring_study/tree/main/springboot_and_jpa_uses1/jpashop)
