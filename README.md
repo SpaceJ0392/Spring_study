@@ -3,10 +3,10 @@
 
 __현재 정리 중인 내용__
 - JPA Programming - 기본편
-  - project file : 
+  - project file : [ex1-hello-jpa](https://github.com/SpaceJ0392/Spring_study/tree/main/ex1-hello-jpa)
 
 __현재 정리된 내용__
 - Spring Core
-  - project file :
+  - project file : []()
 - Springboot 와 JPA 활용 1 - 웹 애플리케이션 만들기 (2023.09.13.)  
   - project file : [springboot_and_jpa_uses1/jpashop](https://github.com/SpaceJ0392/Spring_study/tree/main/springboot_and_jpa_uses1/jpashop)
