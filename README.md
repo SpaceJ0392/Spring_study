@@ -2,7 +2,7 @@
 이 리포지토리는 inflearn 김영한의 Spring 강의를 학습한 내용을 정리하는 공간입니다.
 
 __현재 정리 중인 내용__
-- JPA Programming - 기본편
+- JPA Programming - 기본편 (2023.11.23 ~)
   - project file : [ex1-hello-jpa](https://github.com/SpaceJ0392/Spring_study/tree/main/ex1-hello-jpa)
 
 __현재 정리된 내용__
