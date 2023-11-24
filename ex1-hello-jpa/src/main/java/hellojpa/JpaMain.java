@@ -22,20 +22,22 @@ public class JpaMain {
 //            member.setId(1L);
 //            member.setName("HelloA");
 //            em.persist(member);
+//            // ID 전략이 Identitiy일 때, DB에 데이터가 들어가야 ID를 알수 있으므로, 예외적으로 persist 시, 바로 insert 하고 영속화
+//            // ID 전략이 Sequence는 ID를 알기 위해 persist 시, DB에서 시퀀스 값을 얻어와서 persist하며, 영속화
 
             // 회원 수정
-            Member findMember = em.find(Member.class, 1L);
-            findMember.setName("HelloJPA");
+//            Member findMember = em.find(Member.class, 1L);
+//            findMember.setName("HelloJPA");
 
             //회원 조회
 //            Member findMember = em.find(Member.class, 1L);
 //            System.out.println("findMember_id = " + findMember.getId());
 //            System.out.println("findMember_Name = " + findMember.getName());
-            List<Member> result = em.createQuery("select m from Member as m", Member.class)
-                    .getResultList();
-            for (Member ret :result) {
-                System.out.println("result = " + ret.getName());
-            }
+//            List<Member> result = em.createQuery("select m from Member as m", Member.class)
+//                    .getResultList();
+//            for (Member ret :result) {
+//                System.out.println("result = " + ret.getName());
+//            }
 
             //회원 삭제
 //            Member findMember = em.find(Member.class, 1L);

@@ -15,7 +15,8 @@
             <property name="hibernate.show_sql" value="true"/>
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.use_sql_comments" value="true"/>
-            <!--<property name="hibernate.hbm2ddl.auto" value="create" />-->
+            <property name="hibernate.jdbc.batch_size" value="10"/> <!-- 일종의 버퍼링. 한번에 가져올 데이터 크기 지정 해당 쿼리가 쌓일 때 까지 대기한다...-->
+            <property name="hibernate.hbm2ddl.auto" value="create" /> <!-- 사용 시, 데이터베이스 스키마를 자동 생성할 수 있다. 개발 및 운영 시 사용 X -->
         </properties>
     </persistence-unit>
 </persistence>
