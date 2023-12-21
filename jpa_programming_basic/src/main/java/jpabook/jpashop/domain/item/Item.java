@@ -1,12 +1,15 @@
-package jpabook.jpashop.domain;
+package jpabook.jpashop.domain.item;
 
 import jakarta.persistence.*;
+import jpabook.jpashop.domain.BaseEntity;
+import jpabook.jpashop.domain.Category;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class Item {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public class Item extends BaseEntity {
     @Id @GeneratedValue
     @Column(name = "ITEM_ID")
     private Long id;
