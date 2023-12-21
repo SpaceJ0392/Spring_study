@@ -2,6 +2,9 @@ package hellojpa.domain;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class Member {
 
@@ -11,6 +14,14 @@ public class Member {
 
     @Column(name = "USERNAME")
     private String name;
+
+    @OneToOne
+    @JoinColumn(name = "LOCKER_ID")
+    private Locker locker;
+
+    @ManyToMany //안 씀
+    @JoinTable(name = "MEMBER_PRODUCT")
+    private List<Product> products = new ArrayList<>();
 
 //    @Column(name = "TEAM_ID")
 //    private Long teamId;

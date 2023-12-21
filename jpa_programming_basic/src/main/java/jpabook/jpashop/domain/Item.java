@@ -14,6 +14,9 @@ public class Item {
     private String name;
     private int price;
 
+    @ManyToMany(mappedBy = "items")
+    private List<Category> categories = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
