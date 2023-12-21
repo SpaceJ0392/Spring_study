@@ -31,7 +31,16 @@ public class Member {
     public Team getTeam() {
         return team;
     }
-    public void setTeam(Team team) {
+    public void changeTeam(Team team) {
         this.team = team;
+        team.getMembers().add(this);
     }
+
+    /**
+     * 여기서 toString을 쓰면, 당연하게 team의 toString도 호출된다 (team이라는 객체를 가지고 있으므로)
+     * 그러면 team객체에서도 member관견 객체를 양뱡향으로 매핑하고 있으면, 당연히 무한 루프 발생
+     *
+     *  이외에도 JSON 생성 라이브러리 등을 사용할 때, Entity를 그대로 반환하면, 위와 같은 무한 루프 문제가 발생할 수 있다.
+     *  그러므로, DTO를 이용하여 쓰는 것이 맞다...
+     */
 }

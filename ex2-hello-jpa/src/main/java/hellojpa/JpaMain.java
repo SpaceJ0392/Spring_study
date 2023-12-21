@@ -27,7 +27,8 @@ public class JpaMain {
 
             Member member = new Member();
             member.setName("memberA");
-            member.setTeam(team);
+            member.changeTeam(team); //연관관계 편의 메소드 (양방향으로 객체가 매핑되게 구성 - JPA 자체는 주인만 알면되기는 함.)
+            //양 방향 매핑 시, 일반적으로 주인이 되는 객체에만 연관관계에 대해 변경 가능. (mapped by로 연결된 객체는 그냥 읽기용)
             em.persist(member);
 
             em.flush();
