@@ -15,9 +15,9 @@ public class Member extends BaseEntity{
     @Column(name = "USERNAME")
     private String name;
 
-    @OneToOne
-    @JoinColumn(name = "LOCKER_ID")
-    private Locker locker;
+//    @OneToOne
+//    @JoinColumn(name = "LOCKER_ID")
+//    private Locker locker;
 
     @ManyToMany //안 씀
     @JoinTable(name = "MEMBER_PRODUCT")
@@ -26,7 +26,7 @@ public class Member extends BaseEntity{
 //    @Column(name = "TEAM_ID")
 //    private Long teamId;
 
-    @ManyToOne //팀이 1, 멤버가 다
+    @ManyToOne(fetch = FetchType.LAZY) //팀이 1, 멤버가 다
     @JoinColumn(name = "TEAM_ID") //연결될 FK는 team_id
     private Team team;
 
