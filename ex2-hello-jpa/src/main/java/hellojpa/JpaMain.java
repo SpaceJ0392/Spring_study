@@ -7,7 +7,10 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
 
+import java.util.List;
+
 public class JpaMain {
+
     public static void main(String[] args) {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
         EntityManager em = emf.createEntityManager();
@@ -71,6 +74,9 @@ public class JpaMain {
 //            member1.getHomeAddress().setCity("new_city");
 //            //만약 member2에서 그냥 address를 쓰고 있었으면, member1의 내용을 바꿀 때 같이 바뀌었을 것 (주의!!!) - 그래서 불변 객체로 setter 등을 없앤다.
 
+            //JPQL
+            List<Member> resultList = em.createQuery("select m FROM Member as m where m.name like '%kim%'", Member.class)
+                    .getResultList();
 
             tx.commit();
         } catch (Exception e) {
