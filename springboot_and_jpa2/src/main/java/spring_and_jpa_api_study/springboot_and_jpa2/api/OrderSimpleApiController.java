@@ -25,6 +25,10 @@ public class OrderSimpleApiController {
     @GetMapping("api/v1/simple-orders")
     public List<Order> ordersV1(){
         List<Order> all = orderRepository.findAllByString(new OrderSearch());
+        for (Order order : all) {
+            order.getMember().getName(); //강제로 Lazy 호출
+            order.getDelivery().getAddress(); //강제로 Lazy 호출
+        }
         return all; //무한 루프 - Order에서 member 호출 후 member에서 orders 호출로 반복...
         //양방향 연관 관계 중 하나는 @JsonIgnore한다.
     }

@@ -14,6 +14,10 @@ public class SpringbootAndJpa2Application {
 
     @Bean
     Hibernate5JakartaModule hibernate5Module(){
-        return new Hibernate5JakartaModule();
+        Hibernate5JakartaModule hibernate5JakartaModule = new Hibernate5JakartaModule();
+//        hibernate5JakartaModule.configure(Hibernate5JakartaModule.Feature.FORCE_LAZY_LOADING, true);
+        //Lazy 처리되어 있는걸 다 가져오게 함. (기본 전략은 lazy 값은 proxy 이므로 null을 반환)
+        //당연히 좋지 않음... (필요하지 않은 것까지 다 가져옴.)
+        return hibernate5JakartaModule;
     }
 }
