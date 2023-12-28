@@ -1,20 +1,19 @@
 package spring_and_jpa_api_study.springboot_and_jpa2.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Setter @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Delivery {
     @Id
     @GeneratedValue
     @Column(name = "delivery_id")
     private Long id;
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "delivery")
     private Order order;
 

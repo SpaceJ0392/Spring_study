@@ -21,6 +21,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5-jakarta'
+
     implementation("com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0")
     //SQL 로거용 파라미터 보이기
 
