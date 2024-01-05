@@ -64,4 +64,18 @@ public class OrderRepository {
         return query.getResultList(); //결과 1000개 까지만
 
     }
+
+    public List<Order> findAllByFetch() {
+        return em.createQuery(
+                //원래는 orderitems 갯수에 맞추어 order 가 늘어나서 나와야 하나 hibernate 6.0 부터는 distinct가 기본 적용
+                //여기서의 distinct는 DB의 데이터의 전체가 같을 때의 중복 제거 + 가져와서 JPA 상의 ID가 같은 데이터에 대한 중복 제거
+                "select o from Order o " +
+                "join fetch o.member m " +
+                "join fetch o.delivery d " +
+                "join fetch o.orderItems oi " +
+                "join fetch oi.item i", Order.class)
+                .setFirstResult(1) //distinct가 자동 적용되며, paging도 가능하나, 메모리에 가져와서 해야함... (즉, DB 레벨에서의 paging이 안됨.)
+                .setMaxResults(100) //사실상 페이징 안됨.... - 일 대 다 관계(컬랙션 페치 조인)가 있을 때, 안되는 거다... (데이터가 뻥튀기 되므로)
+                .getResultList();
+    }
 }
