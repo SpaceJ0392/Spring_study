@@ -74,8 +74,18 @@ public class OrderRepository {
                 "join fetch o.delivery d " +
                 "join fetch o.orderItems oi " +
                 "join fetch oi.item i", Order.class)
-                .setFirstResult(1) //distinct가 자동 적용되며, paging도 가능하나, 메모리에 가져와서 해야함... (즉, DB 레벨에서의 paging이 안됨.)
-                .setMaxResults(100) //사실상 페이징 안됨.... - 일 대 다 관계(컬랙션 페치 조인)가 있을 때, 안되는 거다... (데이터가 뻥튀기 되므로)
+                //.setFirstResult(1) //distinct가 자동 적용되며, paging도 가능하나, 메모리에 가져와서 해야함... (즉, DB 레벨에서의 paging이 안됨.)
+                //.setMaxResults(100) //사실상 페이징 안됨.... - 일 대 다 관계(컬랙션 페치 조인)가 있을 때, 안되는 거다... (데이터가 뻥튀기 되므로)
+                .getResultList();
+    }
+
+    public List<Order> findAllByToOneWithPageing(int offset, int limit) { //toOne 관계는 데이터가 뻥튀기 되지 않으므로 페치 조인하고, 컬렉션은 지연로딩으로 가져온다.
+        return em.createQuery(
+                        "select o from Order o " +
+                                "join fetch o.member m " +
+                                "join fetch o.delivery d", Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
     }
 }

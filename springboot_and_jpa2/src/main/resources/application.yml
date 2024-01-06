@@ -13,8 +13,9 @@ spring:
         hibernate:
           #show_sql: true # 아래와 SQL를 보여주는 것은 같으나, 시스템 출력에서 출력 - 그래서 쓰면 안됨.
           format_sql: true
+          default_batch_fetch_size: 10 # 지연로딩에 대해 한번에 조회할 개수를 100개로 (기본은 관련된거 1개 가져옴)
 
 logging:
   level:
     org.hibernate.SQL: debug # SQL과 JPA를 출력하나, 로거에서 출력
-    org.hibernate.orm.jdbc.bind: trace # SQL의 파라미터를 로그에 찍어줌... (보다 간단하게 보기 위해서 외부 라이브러리 사용 가능)
+    # org.hibernate.orm.jdbc.bind: trace # SQL의 파라미터를 로그에 찍어줌... (보다 간단하게 보기 위해서 외부 라이브러리 사용 가능)
