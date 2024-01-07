@@ -15,6 +15,9 @@ spring:
           format_sql: true
           default_batch_fetch_size: 10 # 지연로딩에 대해 한번에 조회할 개수를 100개로 (기본은 관련된거 1개 가져옴)
 
+    open-in-view: false # 영속성 컨텍스트가 커낵션을 가지고 있는 범위를 트랜잭션 끝날 때 까지로 한정
+    # (true로 하면, 뷰에서까지도 지연로딩 가능, 그러나, 커넥션 소유가 길어져 커넥션이 부족해질 수 있음.)
+
 logging:
   level:
     org.hibernate.SQL: debug # SQL과 JPA를 출력하나, 로거에서 출력

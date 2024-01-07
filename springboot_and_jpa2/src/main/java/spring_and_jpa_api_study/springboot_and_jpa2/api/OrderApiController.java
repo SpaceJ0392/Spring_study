@@ -58,7 +58,7 @@ public class OrderApiController {
             (@RequestParam(value = "offset", defaultValue = "0") int offset,
              @RequestParam(value = "limit", defaultValue = "100") int limit)
     {
-        return orderRepository.findAllByToOneWithPageing(offset, limit)
+        return orderRepository.findAllByToOneWithPaging(offset, limit)
                 .stream().map(OrderDto::new).collect(Collectors.toList());
     }
 

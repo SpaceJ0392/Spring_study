@@ -1,11 +1,16 @@
 package spring_and_jpa_api_study.springboot_and_jpa2.repository;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 import spring_and_jpa_api_study.springboot_and_jpa2.domain.Order;
+import spring_and_jpa_api_study.springboot_and_jpa2.domain.OrderStatus;
+import spring_and_jpa_api_study.springboot_and_jpa2.domain.QMember;
+import spring_and_jpa_api_study.springboot_and_jpa2.domain.QOrder;
 
 import java.util.List;
 
@@ -65,6 +70,33 @@ public class OrderRepository {
 
     }
 
+    public List<Order> findAllByQueryDsl(OrderSearch orderSearch){
+        JPAQueryFactory query = new JPAQueryFactory(em);
+        QOrder order = QOrder.order;
+        QMember member = QMember.member;
+
+        return query.select(order)
+                .from(order)
+                .join(order.member, member)
+                .where(statusEq(orderSearch.getOrderStatus()), nameLike(orderSearch.getMemberName()))
+                .limit(1000)
+                .fetch();
+    }
+
+    private BooleanExpression nameLike(String memberName) {
+        if (!StringUtils.hasText(memberName)){
+            return null;
+        }
+        return QMember.member.name.like(memberName);
+    }
+
+    private BooleanExpression statusEq(OrderStatus orderStatus){
+        if (orderStatus == null){
+            return null;
+        }
+        return QOrder.order.status.eq(orderStatus);
+    }
+
     public List<Order> findAllByFetch() {
         return em.createQuery(
                 //원래는 orderitems 갯수에 맞추어 order 가 늘어나서 나와야 하나 hibernate 6.0 부터는 distinct가 기본 적용
@@ -79,7 +111,7 @@ public class OrderRepository {
                 .getResultList();
     }
 
-    public List<Order> findAllByToOneWithPageing(int offset, int limit) { //toOne 관계는 데이터가 뻥튀기 되지 않으므로 페치 조인하고, 컬렉션은 지연로딩으로 가져온다.
+    public List<Order> findAllByToOneWithPaging(int offset, int limit) { //toOne 관계는 데이터가 뻥튀기 되지 않으므로 페치 조인하고, 컬렉션은 지연로딩으로 가져온다.
         return em.createQuery(
                         "select o from Order o " +
                                 "join fetch o.member m " +
