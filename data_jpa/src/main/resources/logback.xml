@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG"> <!-- 로그레벨이 기본 설정이 Info로 설정되어 테스트에서 로그를 보려면 Debug로 설정, 차후, 스프링 돌릴 때는 Info로 재설정 -->
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
