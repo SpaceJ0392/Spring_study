@@ -237,4 +237,49 @@ class MemberRepositoryTest {
         //then
     }
 
+
+    @Test
+    public void testEntityGraph() throws Exception {
+        //given
+        Team teamA = teamRepository.save(new Team("teamA"));
+        Team teamB = teamRepository.save(new Team("teamB"));
+
+        Member member1 = memberRepository.save(new Member("member1", 10, teamA));
+        Member member2 = memberRepository.save(new Member("member2", 10, teamB));
+
+        em.flush();
+        em.clear();
+
+        //when
+        List<Member> result = memberRepository.findAll();
+
+        //then
+        for (Member member : result) {
+            System.out.println("member = " + member);
+            System.out.println("TeamName = " + member.getTeam().getName());
+        }
+    }
+
+    @Test
+    public void testQueryHint() throws Exception {
+        //given
+        Member member1 = memberRepository.save(new Member("member1", 10));
+
+        em.flush();
+        em.clear();
+
+        //when
+        Member result = memberRepository.findReadOnlyByUserName(member1.getUserName()) ;
+        result.setUserName("member2");
+
+        em.flush();
+        //flush를 하려면 결국 원본과 변경본 데이터 2개를 가져야 한다. (최적화되어 있겠지만, 용량을 먹는게 사실 + 변경확인하는 것도 성능 먹음)
+        //따라서, 단순 조회만을 하거나, 하려면, hint를 통해 readonly임을 알리면, 가져올 때, 복제본을 만들지 않는다.
+        //readonly 후 flush를 하면 스냅샷을 만들지 않아서 변경 감지가 안됨.
+
+        //이건, 진짜 중요한 데서, 성능을 위해서나 사용하는 거다. 게다가, 진짜 성능이 문제가 될 정도면 이미 캐시등을 깔아놓고 씀...
+
+    }
+
+
 }

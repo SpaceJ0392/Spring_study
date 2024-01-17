@@ -1,10 +1,10 @@
 package spring_study.data_jpa.repository;
 
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import spring_study.data_jpa.dto.MemberDto;
@@ -64,4 +64,27 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Modifying(clearAutomatically = true) //이게없으면 업데이트가 호출 안됨.
     @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
     int bulkAgePlus(@Param("age") int age);
+
+    // Entity Graph (fetch join)
+    @Override
+    @EntityGraph(attributePaths = {"team"}) //fetch join을 해줌...
+    List<Member> findAll();
+
+    @EntityGraph(attributePaths = {"team"}) //fetch join을 해줌...
+    @Query("select m from Member m") //이런식으로 쿼리에 fetch join 을 해도 됨.
+    List<Member> findMemberEntityGraph();
+
+    //@EntityGraph(attributePaths = {"team"})
+    @EntityGraph("Member.all") //JPA표준인 NamedEntityGraph를 지원.
+    List<Member> findEntityGraphByUserName(String username);
+
+    //Jpa Hint
+    //데이터를 호출 시, 변경 감지가 필요없는 읽기용 데이터는 굳이 복제본을 만들 필요가 없으나, readonly로 하지 않으면, 변경 감지를 위해
+    //데이터를 복제함. 이를 hint를 통해 방지할 수 있음. (다만, JPA 표준이 아니라 Hibernate가 제공) - hint자체늕 JPA 기능, readonly가 hibernate
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUserName(String name);
+
+    @Lock(value = LockModeType.PESSIMISTIC_WRITE) //쿼리 중 접근하지 못하게 하는 Lock를 JPA도 제공한다 정도만 알아라
+    List<Member> findLockByUserName(String name); //깊이있는 내용이라, 이렇게 쓸 수 있다 정도로 넘어간다.
+
 }

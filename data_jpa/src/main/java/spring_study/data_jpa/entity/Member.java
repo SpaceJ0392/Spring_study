@@ -11,6 +11,7 @@ import lombok.*;
         name = "Member.findByUsernameNamedQuery",
         query = "select m from Member m where m.userName = :username"
 )
+@NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team")) //JPA 표준 (fetch를 해줌...)
 public class Member {
 
     @Id @GeneratedValue
