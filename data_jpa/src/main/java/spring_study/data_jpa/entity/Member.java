@@ -7,6 +7,10 @@ import lombok.*;
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED) //jpa가 프록시 기술을 사용하므로 private은 안됨.
 @ToString(of = {"id","userName","age"}) //연관관계 필드는 무한루프 유발 가능성이 있어서 team은 배제
+@NamedQuery(
+        name = "Member.findByUsernameNamedQuery",
+        query = "select m from Member m where m.userName = :username"
+)
 public class Member {
 
     @Id @GeneratedValue
@@ -22,6 +26,11 @@ public class Member {
 
     public Member(String userName) {
         this.userName = userName;
+    }
+
+    public Member(String userName, int age) {
+        this.userName = userName;
+        this.age = age;
     }
 
     public Member(String userName, int age, Team team) {
