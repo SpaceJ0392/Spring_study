@@ -281,5 +281,18 @@ class MemberRepositoryTest {
 
     }
 
+    @Test
+    public void callCustom() throws Exception {
+        //given
+        Member member = new Member("memberA", 10);
+        memberRepository.save(member);
+
+        //when
+        List<Member> res = memberRepository.findMemberCustom();
+
+        //then
+        assertThat(res.get(0).getUserName()).isEqualTo(member.getUserName());
+    }
+
 
 }

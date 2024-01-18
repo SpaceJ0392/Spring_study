@@ -14,8 +14,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface MemberRepository extends JpaRepository<Member, Long> {
+@Repository //커스텀한 리포지토리를 상속하여 사용해도 됨 - 이때는, Spring data jpa가 자동으로 구현체를 가져다 쓴다.
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberCustomRepository {
 
     //쿼리 메소드 - 간단한 메소드의 시그니처를 통해 쿼리 생성
     List<Member> findByUserNameAndAgeGreaterThan(String username, int age);
