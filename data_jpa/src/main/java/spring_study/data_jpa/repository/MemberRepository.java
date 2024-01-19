@@ -88,6 +88,18 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
     List<Member> findLockByUserName(String name); //깊이있는 내용이라, 이렇게 쓸 수 있다 정도로 넘어간다.
 
     //projection
-    List<UsernameOnly> findProjectionsByUsername(String username);
+    List<UsernameOnly> findProjectionsByUserName(String username);
+    <T> List<T> findProjectionsDtoByUserName(String username, Class<T> type);
+
+    //Native query - 최후의 수단
+    @Query(value = "select * from member where user_name = ?", nativeQuery = true)
+    Member findByNativeQuery(String username);
+
+    //naive + projection = DTO로 받고 싶은데, native로 쓸 때 (동적쿼리 X)
+    @Query(value = "select m.member_id as id, m.user_name as username, t.name as teamname" +
+            " from member m left join team t",
+            countQuery = "select count(*) from member",
+            nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 
 }

@@ -370,8 +370,50 @@ class MemberRepositoryTest {
         em.clear();
 
         //when
-        List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1");
+        List<UsernameOnly> result = memberRepository.findProjectionsByUserName("m1");
+        List<UsernameOnlyDto> dtoRes = memberRepository.findProjectionsDtoByUserName("m1", UsernameOnlyDto.class);
+        List<NestedClosedProjections> nestRes = memberRepository.findProjectionsDtoByUserName("m1", NestedClosedProjections.class);
         //then
+        for (UsernameOnly usernameOnly : result) {
+            System.out.println("usernameOnly = " + usernameOnly);
+        }
+
+        for (UsernameOnlyDto dtoRe : dtoRes) {
+            System.out.println("dtoRe = " + dtoRe.getUserName());
+        }
+
+        for (NestedClosedProjections nestRe : nestRes) {
+            System.out.println("nestRe.username = " + nestRe.getUserName() + " teamName = " + nestRe.getTeam().getName());
+        }
+
         assertThat(result.size()).isEqualTo(1);
     }
+
+    @Test
+    public void testNativeQuery() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        Member result = memberRepository.findByNativeQuery("m1");
+        Page<MemberProjection> resultByNativeProjection = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> content = resultByNativeProjection.getContent();
+        for (MemberProjection memberProjection : content) {
+            System.out.println("memberProjection = " + memberProjection.getUsername());
+            System.out.println("memberProjection = " + memberProjection.getTeamname());
+        }
+
+        //then
+        System.out.println("result = " + result);
+    }
+
 }
