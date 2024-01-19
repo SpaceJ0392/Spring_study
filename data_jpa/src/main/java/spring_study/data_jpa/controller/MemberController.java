@@ -1,10 +1,13 @@
 package spring_study.data_jpa.controller;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import spring_study.data_jpa.dto.MemberDto;
 import spring_study.data_jpa.entity.Member;
 import spring_study.data_jpa.repository.MemberRepository;
 
@@ -24,8 +27,16 @@ public class MemberController {
         return member.getUserName();
     }
 
-    @PostConstruct
-    public void init(){
-        memberRepository.save(new Member("userA"));
+    @GetMapping("/members")
+    public Page<MemberDto> list(@PageableDefault(size = 5) Pageable pageable){ //yml 파일이 아니라, 여기서 해당 부분만 제약
+        //return memberRepository.findAll(pageable).map(member -> new MemberDto(member.getUserName(), member.getAge()));
+        return memberRepository.findAll(pageable).map(MemberDto::new); //MemberDto::new == member -> new MemberDto(member)
+    }
+
+    //@PostConstruct
+    public void init() {
+        for (int i = 0; i < 100; i++) {
+            memberRepository.save(new Member("user" + i, i));
+        }
     }
 }

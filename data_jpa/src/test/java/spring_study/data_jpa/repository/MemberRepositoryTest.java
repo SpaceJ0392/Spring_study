@@ -5,9 +5,8 @@ import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import spring_study.data_jpa.dto.MemberDto;
@@ -35,7 +34,7 @@ class MemberRepositoryTest {
     EntityManager em;
 
     @Test
-    public void testMember(){
+    public void testMember() {
         Member member = new Member("memberA");
         Member savedMember = memberRepository.save(member);
 
@@ -47,7 +46,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void basicCRUD(){
+    public void basicCRUD() {
         Member member1 = new Member("member1");
         Member member2 = new Member("member2");
         memberRepository.save(member1);
@@ -77,7 +76,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void findByUserNameAndAgeGreaterThan(){
+    public void findByUserNameAndAgeGreaterThan() {
         Member m1 = new Member("AAA", 10);
         Member m2 = new Member("AAA", 20);
 
@@ -112,7 +111,7 @@ class MemberRepositoryTest {
         memberRepository.save(m1);
         memberRepository.save(m2);
 
-        List<Member> findMember = memberRepository.findMember(10,"AAA");
+        List<Member> findMember = memberRepository.findMember(10, "AAA");
 
         assertThat(findMember.get(0)).isEqualTo(m1);
     }
@@ -169,7 +168,7 @@ class MemberRepositoryTest {
     }
 
     @Test
-    public void paging(){
+    public void paging() {
         //given
         memberRepository.save(new Member("member1", 10));
         memberRepository.save(new Member("member2", 10));
@@ -269,7 +268,7 @@ class MemberRepositoryTest {
         em.clear();
 
         //when
-        Member result = memberRepository.findReadOnlyByUserName(member1.getUserName()) ;
+        Member result = memberRepository.findReadOnlyByUserName(member1.getUserName());
         result.setUserName("member2");
 
         em.flush();
@@ -294,5 +293,85 @@ class MemberRepositoryTest {
         assertThat(res.get(0).getUserName()).isEqualTo(member.getUserName());
     }
 
+    @Test
+    public void jpaEventBaseEntity() throws Exception {
+        //given
+        Member member = new Member("member1");
+        memberRepository.save(member); //@PrePersist
 
+        Thread.sleep(100);
+        member.setUserName("member2");
+        em.flush(); //@PreUpdate
+        em.clear();
+        //when
+        Member findMember = memberRepository.findById(member.getId()).get();
+        //then
+        System.out.println("findMember.createdDate = " + findMember.getCreatedDate());
+        System.out.println("findMember.updatedDate = " + findMember.getLastModifiedDate());
+    }
+
+    @Test
+    public void specBasic() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+        //when
+        Specification<Member> spec =
+                MemberSpec.username("m1").and(MemberSpec.teamName("teamA"));
+
+        List<Member> result = memberRepository.findAll(spec);
+        //then
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    @Test
+    public void queryByExampleTest() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+        em.persist(new Member("m1", 0, teamA));
+        em.persist(new Member("m2", 0, teamA));
+        em.flush();
+        //when
+        //Probe 생성
+        Member member = new Member("m1");
+        Team team = new Team("teamA"); //내부조인으로 teamA 가능
+        member.setTeam(team);
+        //ExampleMatcher 생성, age 프로퍼티는 무시
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnorePaths("age");
+        Example<Member> example = Example.of(member, matcher);
+        List<Member> result = memberRepository.findAll(example);
+        //then
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+
+    @Test
+    public void projections() throws Exception {
+        //given
+        Team teamA = new Team("teamA");
+        em.persist(teamA);
+
+        Member m1 = new Member("m1", 0, teamA);
+        Member m2 = new Member("m2", 0, teamA);
+        em.persist(m1);
+        em.persist(m2);
+
+        em.flush();
+        em.clear();
+
+        //when
+        List<UsernameOnly> result = memberRepository.findProjectionsByUsername("m1");
+        //then
+        assertThat(result.size()).isEqualTo(1);
+    }
 }

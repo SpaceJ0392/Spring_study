@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository //커스텀한 리포지토리를 상속하여 사용해도 됨 - 이때는, Spring data jpa가 자동으로 구현체를 가져다 쓴다.
-public interface MemberRepository extends JpaRepository<Member, Long>, MemberCustomRepository {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberCustomRepository, JpaSpecificationExecutor<Member> {
 
     //쿼리 메소드 - 간단한 메소드의 시그니처를 통해 쿼리 생성
     List<Member> findByUserNameAndAgeGreaterThan(String username, int age);
@@ -86,5 +86,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
 
     @Lock(value = LockModeType.PESSIMISTIC_WRITE) //쿼리 중 접근하지 못하게 하는 Lock를 JPA도 제공한다 정도만 알아라
     List<Member> findLockByUserName(String name); //깊이있는 내용이라, 이렇게 쓸 수 있다 정도로 넘어간다.
+
+    //projection
+    List<UsernameOnly> findProjectionsByUsername(String username);
 
 }
