@@ -1,8 +1,10 @@
 package spring_study.querydsl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import spring_study.querydsl.dto.MemberDto;
+import spring_study.querydsl.dto.QMemberDto;
 import spring_study.querydsl.dto.UserDto;
 import spring_study.querydsl.entity.Member;
 import spring_study.querydsl.entity.QMember;
@@ -521,5 +524,151 @@ public class QuerydslBasicTest {
             System.out.println("memberDto = " + memberDto);
         }
     }
+    
+    @Test
+    public void findDtoByQueryProjection() throws Exception {
+        List<MemberDto> res = query.select(new QMemberDto(member.membername, member.age))
+                .from(member).fetch();
+        //얘와 projections.constructor의 차이는 projections.constructor는 컴파일 오류가 안남
+        // (생성자에 다른 param을 추가로 넣어도 에러 X)
+
+
+        //단, 얘는 컴파일 체킹이 되서 굉장히 좋은데, 큐파일을 생성해야 하고, DTO가 queryDSL에 대한 의존성을 가지게 된다는 문제가 있음.
+        for (MemberDto dto : res) {
+            System.out.println("dto = " + dto);
+        }
+    }
+    
+    @Test
+    public void dynamicQueryBooleanBuilder() throws Exception {
+        String memberNameParam = "mem1";
+        Integer ageParam = 10;
+
+        List<Member> result = searchMember1(memberNameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember1(String memberNameCond, Integer ageCond) {
+
+        BooleanBuilder builder = new BooleanBuilder(); //파리미터로 초기 조건 setting 가능
+        if (memberNameCond != null){
+            builder.and(member.membername.eq(memberNameCond));
+        }
+
+        if (ageCond != null){
+            builder.and(member.age.eq(ageCond));
+        }
+
+        return query.selectFrom(member)
+                .where(builder)
+                .fetch();
+    }
+
+
+    @Test
+    public void dynamicQueryWhereParam() throws Exception {
+        String memberNameParam = "mem1";
+        Integer ageParam = null;
+
+        List<Member> result = searchMember2(memberNameParam, ageParam);
+        assertThat(result.size()).isEqualTo(1);
+    }
+
+    private List<Member> searchMember2(String memberNameCond, Integer ageCond) {
+        return query.selectFrom(member)
+                //.where(allEq(memberNameCond, ageCond))
+                .where(membernameEq(memberNameCond), ageEq(ageCond)) //연속해서 나열시 and로 연결됨
+                // where에 들어간 null 값은 조건 무시
+                .fetch();
+    }
+
+    private BooleanExpression membernameEq(String memberNameCond) {
+        //Predicate 대신 BooleanExpression 사용 가능 -- 인터페이스에서 알아서 받음.
+        return memberNameCond == null ? null : member.membername.eq(memberNameCond);
+    }
+
+    private BooleanExpression ageEq(Integer ageCond) {
+        if (ageCond == null) {
+            return null;
+        }
+        return member.age.eq(ageCond);
+    }
+
+    private BooleanExpression allEq(String memberNameCond, Integer ageCond){
+        //Predicate로 반환하면, .and() 사용 불가.
+        return membernameEq(memberNameCond).and(ageEq(ageCond)); //이런 식으로 합칠 수도 있음
+    }
+
+    @Test
+    public void bulkUpdate() throws Exception {
+
+        //mem1, 10 -> 비회원
+        //mem2, 20 -> 비회원
+        //mem3, 30 -> 유지
+        //mem4, 40 -> 유지
+
+        long count = query.update(member)
+                .set(member.membername, "비회원")
+                .where(member.age.lt(28))
+                .execute(); //return은 영향을 받은 목록 수
+
+        //얘도 JPQL를 이용한 벌크 연산과 마찬가지로, 영속성을 무시하고 바로 쿼리 나가서, 영속성을 깨짐
+        //DB에는 반영되고, 영속성 컨택스트는 안바뀜.
+
+        //즉, 쿼리를 호출하여 DB의 내용을 가져오는데, 문제는 영속성 컨텍스트에 내용이 있으면,
+        // 그냥 영속성 컨텍스트의 데이터 사용
+
+        em.flush();
+        em.clear(); //그래서 영속성 컨텍스트 날림
+
+        List<Member> res = query.selectFrom(member).fetch();
+
+        for (Member mem : res) {
+            System.out.println("mem = " + mem);
+        }
+    }
+    
+    @Test
+    public void bulkAdd() throws Exception {
+        query.update(member)
+                .set(member.age, member.age.add(1))
+                .execute();
+    }
+    
+    @Test
+    public void bulkDelete() throws Exception {
+        query.delete(member)
+                .where(member.age.goe(18))
+                .execute();
+    }
+
+    @Test
+    public void sqlFunction() throws Exception {
+        List<String> res = query.select(
+                Expressions.stringTemplate("function('replace', {0}, {1}, {2})",
+                        member.membername, "mem", "M")
+        ).from(member).fetch();
+
+        for (String s : res) {
+            System.out.println("s = " + s);
+        }
+    }
+
+    @Test
+    public void sqlFunction2() throws Exception {
+        List<String> res = query.select(member.membername)
+                .from(member)
+                .where(member.membername.eq(
+                        //안시 표준에 등록되는 매우 자주 사용되는 함수는 queryDSL이 내장하고 있음.
+                        //Expressions.stringTemplate("function('lower', {0})", member.membername)))
+                        member.membername.lower()
+                ))
+                .fetch();
+
+        for (String s : res) {
+            System.out.println("s = " + s);
+        }
+    }
+    
     
 }
