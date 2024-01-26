@@ -1,8 +1,11 @@
 package spring_study.querydsl;
 
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -14,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
+import spring_study.querydsl.dto.MemberDto;
+import spring_study.querydsl.dto.UserDto;
 import spring_study.querydsl.entity.Member;
 import spring_study.querydsl.entity.QMember;
 import spring_study.querydsl.entity.Team;
@@ -432,5 +437,89 @@ public class QuerydslBasicTest {
         }
     }
     
+    //Projection -- select 절에 나열되는 가져올 목록을 SQL에서는 projection이라고 한다.
+    @Test
+    public void tupleProjection() throws Exception {
+        List<Tuple> res = query.select(member.membername, member.age).from(member).fetch();
+        //여러개의 타입을 projection 받을 때는 Tuple로 받아짐.
+
+        for (Tuple tuple : res) {
+            String membername = tuple.get(member.membername);
+            Integer age = tuple.get(member.age);
+
+            System.out.println("membername = " + membername);
+            System.out.println("age = " + age);
+        }
+    }
+    
+    @Test
+    public void findDtoByJPQL() throws Exception {
+        List<MemberDto> result = em.createQuery("select new spring_study.querydsl.dto.MemberDto(m.membername, m.age) " +
+                "from Member m", MemberDto.class).getResultList();
+
+        for (MemberDto memberDto : result) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoBySetter() throws Exception { //property 접근 방법 -- setter 이용 (getter, setter 없으면 작동 X)
+        List<MemberDto> res = query.select(Projections.bean(MemberDto.class,
+                        member.membername, member.age))
+                .from(member).fetch(); //bean이 자바 bean 즉, getter, setter로 작동
+
+        for (MemberDto memberDto : res) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findDtoByField() throws Exception { //getter, setter 없어도 바로 필드에 값을 넣음.
+        List<MemberDto> res = query.select(Projections.fields(MemberDto.class,
+                        member.membername, member.age))
+                .from(member).fetch(); //자바 리플렉션등을 이용하여 private에서도 그냥 필드에 값을 넣는다.
+
+        for (MemberDto memberDto : res) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
+
+    @Test
+    public void findUserDtoByField() throws Exception {
+        List<UserDto> res = query.select(Projections.fields(UserDto.class,
+                        member.membername.as("name"), member.age))
+                //projection의 인자가 setter의 프로퍼티명이나, field명과 일치해야 작동 (아니면 as를 주면 된다.)
+                .from(member).fetch();
+
+        for (UserDto userDto : res) {
+            System.out.println("userDto = " + userDto);
+        }
+    }
+
+    @Test
+    public void findUserDtoComplex() throws Exception {
+        QMember subMember = new QMember("sub_member");
+
+        List<UserDto> res = query.select(Projections.fields(UserDto.class,
+                        member.membername.as("name"),
+                        ExpressionUtils.as(JPAExpressions.select(subMember.age.max()).from(subMember), "age")))
+                .from(member).fetch();
+
+        for (UserDto userDto : res) {
+            System.out.println("userDto = " + userDto);
+        }
+    }
+
+    @Test
+    public void findDtoByConstructor() throws Exception { //생성자 이용하여 값을 넣음
+        List<MemberDto> res = query.select(Projections.constructor(MemberDto.class,
+                        member.membername, member.age))
+                //생성자는 타입을 보므로, 인자의 이름은 크게 중요하지 않음. (필드나, setter projection은 다름)
+                .from(member).fetch();
+
+        for (MemberDto memberDto : res) {
+            System.out.println("memberDto = " + memberDto);
+        }
+    }
     
 }
